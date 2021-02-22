@@ -12,17 +12,18 @@ public class Tro implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     String palavraChave;
     String observacao;
     String prazo;
+    String severidade;
 
     @OneToMany(mappedBy = "tro", fetch = FetchType.EAGER)
     List<Local> locais = new ArrayList<>();
 
 
-    public Tro(Long id, String descricao){
+    public Tro(Integer id, String descricao){
         this.id = id;
         this.palavraChave = descricao;
     }
@@ -46,11 +47,11 @@ public class Tro implements Serializable {
         this.locais = locais;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -76,6 +77,14 @@ public class Tro implements Serializable {
 
     public void setPrazo(String prazo) {
         this.prazo = prazo;
+    }
+
+    public String getSeveridade() {
+        return severidade;
+    }
+
+    public void setSeveridade(String severidade) {
+        this.severidade = severidade;
     }
 }
 

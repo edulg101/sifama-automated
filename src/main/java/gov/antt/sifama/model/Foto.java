@@ -8,7 +8,7 @@ public class Foto implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    Integer id;
     String nome;
 
     @ManyToOne
@@ -19,16 +19,16 @@ public class Foto implements Serializable {
 
     }
 
-    public Foto(Long id, String nome) {
+    public Foto(Integer id, String nome) {
         this.id = id;
         this.nome = nome;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

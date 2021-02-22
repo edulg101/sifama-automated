@@ -125,11 +125,9 @@ public class Consulta {
     public void jqueryScriptWithChange(String id, String value) throws InterruptedException {
         js.executeScript("$(`#${arguments[0]} option[value='${arguments[1]}']`).prop('selected', true).change()", id, value);
         WebElement processando = driver.findElement(By.id("Progress_LabelProcessando"));
-        System.out.println("antes do processando");
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Progress_LabelProcessando")));
         wait.until(ExpectedConditions.invisibilityOf(processando));
         Thread.sleep(500);
-        System.out.println("depois do teste");
     }
 
     public void selectSctipt(String id, String value) {
@@ -207,12 +205,16 @@ public class Consulta {
         WebDriverWait longWait = new WebDriverWait(driver, 55000);
         WebElement processando = driver.findElement(By.id("Progress_LabelProcessando"));
 
-
-        System.out.println("antes do processando");
-
         wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Progress_LabelProcessando")));
         Thread.sleep(500);
-        if(driver.findElement(By.id("Progress_LabelProcessando")).isDisplayed()) {
+        boolean processDisplayed = false;
+        try {
+            processDisplayed = driver.findElement(By.id("Progress_LabelProcessando")).isDisplayed();
+        }
+        catch (StaleElementReferenceException e){
+            System.out.println("deu rolo no process displayed");
+        }
+        if(processDisplayed) {
             longWait.until(ExpectedConditions.invisibilityOf(processando));
         }
         Thread.sleep(500);

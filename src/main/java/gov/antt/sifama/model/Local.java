@@ -12,7 +12,7 @@ public class Local implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn (name = "TroId")
@@ -32,7 +32,7 @@ public class Local implements Serializable {
     @OneToMany(mappedBy = "local" , fetch = FetchType.EAGER)
     List<Foto> arquivosDeFotos = new ArrayList<>();
 
-    public Local(Long id, Tro tro, String numIdentificacao, String data, String hora, String rodovia, String kmInicial, String kmFinal, String sentido, String pista) {
+    public Local(Integer id, Tro tro, String numIdentificacao, String data, String hora, String rodovia, String kmInicial, String kmFinal, String sentido, String pista) {
 
         this.id = id;
         this.tro = tro;
@@ -114,11 +114,11 @@ public class Local implements Serializable {
         this.observacao = observacao;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

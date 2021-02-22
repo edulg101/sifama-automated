@@ -68,7 +68,6 @@ public class ImportFromExcel {
             files = file.list();
 
         } catch (Exception e) {
-            // if any error occurs
             e.printStackTrace();
         }
 
@@ -81,6 +80,7 @@ public class ImportFromExcel {
                 nameCompressed = fileStr.substring(0, index) + fileStr.substring(fileStr.indexOf("km") - 1);
                 File oldName = new File(path + "\\" + fileStr);
                 File newName = new File(path + "\\" + nameCompressed);
+
                 if (oldName.renameTo(newName)) {
                     System.out.println("Imagem " + oldName.getName() + "Renomeada para:  " + newName.getName());
                 } else {
@@ -90,6 +90,7 @@ public class ImportFromExcel {
             fotoService.save(new Foto(null, nameCompressed));
 
             String statusCompactacao = FotoService.resize(path + "\\" + nameCompressed, 500);
+
             System.out.println(statusCompactacao);
         }
 
@@ -104,10 +105,8 @@ public class ImportFromExcel {
                     fotoService.save(f);
                     localService.save(l);
                 }
-
             }
         }
-
     }
 
     @Transactional
@@ -133,8 +132,6 @@ public class ImportFromExcel {
             double kmFinalDouble = 0;
 
             for (int j = 0; j < row.getLastCellNum(); j++) {
-                System.out.println("linha: " + i);
-                System.out.println("coluna " + j);
 
                 if (startLocais) {
                     startLocais = false;
@@ -143,23 +140,38 @@ public class ImportFromExcel {
                 Cell cell = row.getCell(j);
 
                 CellType cellType = cell.getCellType();
+                CellType tipo = null;
 
                 if (j == 0 && cellType == STRING) {
                     String cellInfo = cell.getStringCellValue();
                     if (cell.getStringCellValue().toLowerCase().contains("tro")) {
                         cell = row.getCell(j + 1);
-                        palavraChave = cell.getStringCellValue().toLowerCase();
+                        try {
+                            palavraChave = cell.getStringCellValue().toLowerCase();
+                        } catch (NullPointerException e){
+                            System.out.println("i: " + i + " j: " + j);
+                        }
                         tro = new Tro(null, palavraChave);
                         cell = row.getCell(j + 2);
                         if (cell.getCellType() != BLANK){
                             tro.setObservacao(cell.getStringCellValue());
                         }
                         cell = row.getCell(j + 3);
-                        if (cell.getCellType() != BLANK){
+                        try {
+                            tipo = cell.getCellType();
+                        }catch (NullPointerException e){
+                            System.out.println("i: " + i + " j: " + j);
+                        }
+                        if (tipo != BLANK){
                             double p = cell.getNumericCellValue();
                             prazo = String.format("%.0f", p);
                             tro.setPrazo(prazo);
                         }
+                        cell = row.getCell(j + 4);
+                        if (cell.getCellType() == STRING){
+                            tro.setSeveridade(cell.getStringCellValue());
+                        }
+
 
                         tro = troService.save(tro);
 
@@ -215,9 +227,12 @@ public class ImportFromExcel {
                 } else if (j == 8) {
                     pista = cell.getStringCellValue().toLowerCase();
                     pista = pista.contains("p") ? "1" : "2";
+                } else if (j == 9){
 
+                    String localObs = cell.getStringCellValue().toLowerCase();
 
                     Local local = new Local(null, tro, nIdentidade, date, hora, rodovia, kmInicial, kmFinal, sentido, pista);
+                    local.setObservacao(localObs);
                     local = localService.save(local);
 
 
@@ -250,55 +265,3 @@ public class ImportFromExcel {
 
 }
 
-
-//
-//while (rowIterator.hasNext()) {
-//        Row row = rowIterator.next();
-//
-//        Iterator<Cell> cellIterator = row.cellIterator();
-//
-//        while (cellIterator.hasNext()) {
-//        Cell cell = cellIterator.next();
-//        //Check the cell type and format accordingly
-//        switch (cell.getCellType()) {
-//        case NUMERIC: {
-//        if (HSSFDateUtil.isCellDateFormatted(cell)) {
-//        cell.
-//        Date dataCell = cell.getDateCellValue();
-//        System.out.println(dataCell);
-//        str = sdf.format(dataCell);
-//        break;
-//        }
-//        str = String.valueOf(cell.getNumericCellValue()).toLowerCase();
-//        break;
-//        }
-//        case STRING: {
-//
-//        str = cell.getStringCellValue().toLowerCase();
-//        break;
-//        }
-//
-//        }
-//
-//        if (troFlag) {
-//        descricaoTro = str;
-//        System.out.println(descricaoTro);
-//        troFlag = false;
-//        startLocais = true;
-//        }
-//        if (str.equals("tro")) {
-//        troFlag = true;
-//        startLocais = false;
-//        }
-//        if (startLocais) {
-//        camposLocais.add(str);
-//
-//        }
-//        }
-//        locais.add(new ArrayList<>(camposLocais));
-//        camposLocais.clear();
-//        }
-//        for (List<String> lista: locais){
-//        System.out.println(lista);
-//        }
-//        }

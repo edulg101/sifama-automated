@@ -1,6 +1,5 @@
 package gov.antt.sifama;
 
-import com.fasterxml.jackson.databind.deser.std.ObjectArrayDeserializer;
 import gov.antt.sifama.model.Local;
 import gov.antt.sifama.model.Tro;
 import gov.antt.sifama.services.*;
@@ -12,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static gov.antt.sifama.services.appConstants.AppConstants.*;
 
 
 @Service
@@ -33,13 +32,7 @@ public class StartAutomation {
     @Autowired
     FotoService fotoService;
 
-    //Windows
-    public static final String DRIVERPATH = "D:\\chromedriver.exe";
-    public static final String IMGPATH = "D:\\sifamadocs\\imagens";
-    public static final String SPREADSHEETPATH = "D:\\sifamadocs\\planilha\\tros.xlsx";
 
-    //Linux
-//    public static final String DRIVERPATH = "/home/eduardo/automation/chromedriver";
 
     String art = "";
     String tipoOcorrencia = ""; // cod 774 - buracos
@@ -80,9 +73,13 @@ public class StartAutomation {
 
         ie.readSpreadsheet(SPREADSHEETPATH);
 
+        fotoService.unzipAllDirectory(ORIGINIMAGESFOLDER, IMGPATH);
+
         ie.getFilesInPath(IMGPATH);
 
-        inicioDigitacao();
+        fotoService.insertCaption();
+
+//        inicioDigitacao();
 
         return true;
 
@@ -98,9 +95,9 @@ public class StartAutomation {
 
         String todayStr = sdf.format(today);
 
-        String password = "xxx";
+        String password = "xx";
 
-        String user = "xxx";
+        String user = "xx";
 
 
         System.setProperty("webdriver.chrome.driver", DRIVERPATH);
@@ -119,9 +116,6 @@ public class StartAutomation {
 
         System.out.println("abrindo chrome");
 
-//        driver.get("https://appweb1.antt.gov.br/SCA/Site/Login.aspx?ReturnUrl=%2ffisn");
-
-
         driver.get("https://appweb1.antt.gov.br/fisn/Site/TRO/Cadastrar.aspx");
         System.out.println("abrindo pagina do Sifama");
 
@@ -138,12 +132,8 @@ public class StartAutomation {
 
         consulta.waitForProcessBar();
 
-//        wait.until(ExpectedConditions.elementToBeClickable(By.id("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_gdvResultadoConsulta")));
-
-//        driver.navigate().to("https://appweb1.antt.gov.br/fisn/Site/TRO/Cadastrar.aspx");
 
         consulta.waitForJStoLoad();
-
 
         inicioTro(driver, wait, consulta, js);
 
@@ -170,7 +160,6 @@ public class StartAutomation {
     public void registroTro(Tro tro, Consulta consulta, WebDriver driver, WebDriverWait wait, JavascriptExecutor js) throws InterruptedException {
 
 
-
         System.out.println("Selecionando CRO na lista");
 
         consulta.changeValueInSelect("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ddlConcessionaria", "19521322000104");
@@ -180,16 +169,12 @@ public class StartAutomation {
         consulta.jqueryScriptWithChange("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ddlLegislacao", "4071");
 
 
-
-
-
         List<Local> localList = tro.getLocais();
         String palavraChave = tro.getPalavraChave();
 
         List<String> artigoList = getArtigoFromPalavraChave(palavraChave);
         art = artigoList.get(0);
         tipoOcorrencia = artigoList.get(1);
-
 
 
         observacao = tro.getObservacao();
@@ -296,7 +281,9 @@ public class StartAutomation {
 
             while (true) {
                 try {
-                    driver.findElement(By.id("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnIncluirLocal")).click();
+                    consulta.waitForElementById("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnIncluirLocal");
+                    consulta.scriptToClick("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnIncluirLocal");
+//                    driver.findElement(By.id("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnIncluirLocal")).click();
 
                     break;
                 } catch (org.openqa.selenium.StaleElementReferenceException | ElementClickInterceptedException e) {
@@ -307,10 +294,10 @@ public class StartAutomation {
             }
             consulta.waitForProcessBar();
 
-            System.out.println("insere imagem");
         }
-
+        int countImages = 0;
         for (int i = 0; i < localList.size(); i++) {
+
 
             kmInicial = tro.getLocais().get(i).getKmInicial();
             kmFinal = tro.getLocais().get(i).getKmFinal();
@@ -321,7 +308,9 @@ public class StartAutomation {
 
                 consulta.enviaChaves("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_uplFotoLocal", IMGPATH + "\\" + tro.getLocais().get(i).getArquivosDeFotos().get(z).getNome());
 
-                System.out.println("clica botão envia foto");
+                countImages++;
+
+                System.out.print("Enviando foto nº " + countImages + " .............");
 
                 Thread.sleep(500);
 
@@ -337,6 +326,7 @@ public class StartAutomation {
                 }
 
                 Thread.sleep(500);
+                System.out.println( "OK !");
             }
         }
 
@@ -356,7 +346,7 @@ public class StartAutomation {
 
     }
 
-    private List<String> getArtigoFromPalavraChave(String palavraChave){
+    private List<String> getArtigoFromPalavraChave(String palavraChave) {
 
         if (palavraChave.contains("buraco")) {
             art = "6";
@@ -365,6 +355,10 @@ public class StartAutomation {
         } else if (palavraChave.contains("afundamen") || palavraChave.contains("escorregamento") || palavraChave.contains("remendo")) {
             art = "6";
             tipoOcorrencia = "773";
+
+        } else if (palavraChave.contains("drenagem")) {
+            art = "6";
+            tipoOcorrencia = "782";
 
         } else if (palavraChave.contains("meio fio")) {
             art = "4";
@@ -385,21 +379,24 @@ public class StartAutomation {
         } else if (palavraChave.contains("defensa")) {
             art = "7";
             tipoOcorrencia = "808";
-        } else if (palavraChave.contains("instalac") || palavraChave.contains("instalaç")){
+        } else if (palavraChave.contains("instalac") || palavraChave.contains("instalaç")) {
             art = "5";
             tipoOcorrencia = "742";
+        } else if (palavraChave.contains("pmv")){
+            art = "5";
+            tipoOcorrencia = "752";
+        }
+        else {
+            System.out.println("deu merda");
         }
 
 
-        List <String> list = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         list.add(art);
         list.add(tipoOcorrencia);
 
         return list;
     }
-
-
-
 
 
     public boolean waitForJStoLoad(JavascriptExecutor js, WebDriverWait wait) {
