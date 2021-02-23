@@ -8,6 +8,7 @@ import gov.antt.sifama.model.Tro;
 import gov.antt.sifama.model.dto.TroDto;
 import gov.antt.sifama.repositories.FotoRepo;
 import gov.antt.sifama.repositories.LocalRepo;
+import gov.antt.sifama.services.StartAutomation;
 import gov.antt.sifama.services.TroService;
 import javaxt.io.Image;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class TroController {
 
     @Autowired
     LocalRepo localRepo;
+
 
     @GetMapping
     public ResponseEntity<List<TroDto>> getAll() {
@@ -72,5 +74,19 @@ public class TroController {
             listaFotosId.add(foto.getId());
         }
         return ResponseEntity.ok().body(listaFotosId);
+    }
+
+    @GetMapping (value = "/iniciadigitacao")
+    public ResponseEntity<List<TroDto>> iniciaDigitacao() {
+        service.startDigitacao();
+        List<TroDto> obj = service.getTroDto();
+        return ResponseEntity.ok().body(obj);
+    }
+
+    @GetMapping (value = "/startOver")
+    public ResponseEntity<List<TroDto>> startOver() {
+        service.startOver();
+        List<TroDto> obj = service.getTroDto();
+        return ResponseEntity.ok().body(obj);
     }
 }

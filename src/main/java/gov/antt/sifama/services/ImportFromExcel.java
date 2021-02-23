@@ -55,51 +55,70 @@ public class ImportFromExcel {
 
     }
 
+//    @Transactional
+//    public void getFilesInPath(String path) throws Exception {
+//        File file = null;
+//        String[] files = null;
+//
+//        try {
+//            // create new file object
+//            file = new File(path);
+//
+//            // array of files and directory
+//            files = file.list();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        List<Local> locais = localService.getAll();
+//        for (String fileStr : files) {
+//
+//            String shortName = fileStr;
+//            if (fileStr.contains("MT")) {
+//                int index = fileStr.indexOf("MT");
+//                shortName = fileStr.substring(0, index) + fileStr.substring(fileStr.indexOf("km") - 1);
+//                File oldName = new File(path + "\\" + fileStr);
+//                File newName = new File(path + "\\" + shortName);
+//
+//                if (oldName.renameTo(newName)) {
+//                    System.out.println("Imagem " + oldName.getName() + "Renomeada para:  " + newName.getName());
+//                } else {
+//                    System.out.println("Error");
+//                }
+//            }
+//            fotoService.save(new Foto(null, shortName));
+//
+//            String statusCompactacao = FotoService.resize(path + "\\" + shortName, 500);
+//
+//            System.out.println(statusCompactacao);
+//        }
+//
+//
+//        List<Foto> fotos = fotoService.getAll();
+//
+//        for (Foto f : fotos) {
+//            for (Local l : locais) {
+//                if (f.getNome().contains(l.getNumIdentificacao())) {
+//                    l.getArquivosDeFotos().add(f);
+//                    f.setLocal(l);
+//                    fotoService.save(f);
+//                    localService.save(l);
+//                }
+//            }
+//        }
+//    }
+
     @Transactional
-    public void getFilesInPath(String path) throws Exception {
-        File file = null;
-        String[] files = null;
-
-        try {
-            // create new file object
-            file = new File(path);
-
-            // array of files and directory
-            files = file.list();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        List<Local> locais = localService.getAll();
-        for (String fileStr : files) {
-
-            String nameCompressed = fileStr;
-            if (fileStr.contains("MT")) {
-                int index = fileStr.indexOf("MT");
-                nameCompressed = fileStr.substring(0, index) + fileStr.substring(fileStr.indexOf("km") - 1);
-                File oldName = new File(path + "\\" + fileStr);
-                File newName = new File(path + "\\" + nameCompressed);
-
-                if (oldName.renameTo(newName)) {
-                    System.out.println("Imagem " + oldName.getName() + "Renomeada para:  " + newName.getName());
-                } else {
-                    System.out.println("Error");
-                }
-            }
-            fotoService.save(new Foto(null, nameCompressed));
-
-            String statusCompactacao = FotoService.resize(path + "\\" + nameCompressed, 500);
-
-            System.out.println(statusCompactacao);
-        }
-
-
+    public void saveFotosOnLocal(){
         List<Foto> fotos = fotoService.getAll();
+        List<Local> locais = localService.getAll();
 
         for (Foto f : fotos) {
             for (Local l : locais) {
-                if (f.getNome().contains(l.getNumIdentificacao())) {
+                if ((f.getNome().contains(l.getNumIdentificacao()+" ")) ||
+                        (f.getNome().contains(l.getNumIdentificacao() + "_")) ||
+                        (f.getNome().contains(l.getNumIdentificacao() + "("))) {
                     l.getArquivosDeFotos().add(f);
                     f.setLocal(l);
                     fotoService.save(f);

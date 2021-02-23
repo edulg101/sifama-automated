@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static gov.antt.sifama.services.appConstants.AppConstants.*;
 
 @Service
 public class TroService {
@@ -21,10 +24,42 @@ public class TroService {
     @Autowired
     LocalService localService;
 
+    @Autowired
+    StartAutomation startAutomation;
+
+    @Autowired
+    FotoService fotoService;
+
+    @Autowired
+    ImportFromExcel ie;
+
     @Transactional
     public Tro save(Tro tro) {
         tro = troRepo.save(tro);
         return tro;
+    }
+
+    public void deleteAll(){
+        troRepo.deleteAll();
+
+    }
+
+    public void startOver(){
+        fotoService.deleteAll();
+        localService.deleteAll();
+        deleteAll();
+
+        try {
+            ie.readSpreadsheet(SPREADSHEETPATH);
+            fotoService.unzipAllDirectory(ORIGINIMAGESFOLDER, IMGPATH);
+            ie.saveFotosOnLocal();
+            fotoService.insertCaption();
+
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     public List<Tro> getAll(){
@@ -50,5 +85,17 @@ public class TroService {
             dtoList.add(troDto);
         }
         return dtoList;
+    }
+
+    public void startDigitacao(){
+        try {
+            startAutomation.inicioDigitacao();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteAllBD(){
+
     }
 }

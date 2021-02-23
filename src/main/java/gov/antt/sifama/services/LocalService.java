@@ -24,6 +24,10 @@ public class LocalService {
         return tro;
     }
 
+    public void deleteAll(){
+        localRepo.deleteAll();
+    }
+
     public List<Local> getAll(){
         return localRepo.findAll();
     }
