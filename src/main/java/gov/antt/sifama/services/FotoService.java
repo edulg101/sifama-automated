@@ -2,7 +2,6 @@ package gov.antt.sifama.services;
 
 import gov.antt.sifama.model.Foto;
 import gov.antt.sifama.repositories.FotoRepo;
-import org.apache.poi.ss.usermodel.FontFamily;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -307,8 +306,8 @@ public class FotoService {
                 fileName = shortenedName;
             }
 
-            int index1 = fileName.indexOf(".");
-            fileName = fileName.substring(0, index1) + "_" + fileName.substring(index1);
+//            int index1 = fileName.indexOf(".");
+//            fileName = fileName.substring(0, index1) + "_" + fileName.substring(index1);
 
 
             fotoRepo.save(new Foto(null, fileName));
@@ -439,7 +438,8 @@ public class FotoService {
             System.out.println("caption text = " + captionText);
         }
 
-        int coordenatex = (50 - len) * 245 / 50;
+//        int coordenatex = 250 - 5 * len;
+        int coordenatex = 250 - (int)((4.5 * len));
         int coordenatey = 25;
         if (captionText.length() > 1) {
             captionText = captionText.substring(0, 1).toUpperCase() + captionText.substring(1);

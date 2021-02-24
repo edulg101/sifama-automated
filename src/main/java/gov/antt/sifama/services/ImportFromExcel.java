@@ -3,8 +3,6 @@ package gov.antt.sifama.services;
 import gov.antt.sifama.model.Foto;
 import gov.antt.sifama.model.Local;
 import gov.antt.sifama.model.Tro;
-import gov.antt.sifama.repositories.LocalRepo;
-import gov.antt.sifama.repositories.TroRepo;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +15,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.poi.ss.usermodel.CellType.*;
 
@@ -109,6 +109,7 @@ public class ImportFromExcel {
 //        }
 //    }
 
+
     @Transactional
     public void saveFotosOnLocal(){
         List<Foto> fotos = fotoService.getAll();
@@ -116,17 +117,41 @@ public class ImportFromExcel {
 
         for (Foto f : fotos) {
             for (Local l : locais) {
-                if ((f.getNome().contains(l.getNumIdentificacao()+" ")) ||
-                        (f.getNome().contains(l.getNumIdentificacao() + "_")) ||
-                        (f.getNome().contains(l.getNumIdentificacao() + "("))) {
+                String text = f.getNome();
+                String localNumId = l.getNumIdentificacao();
+
+                Pattern pattern = Pattern.compile(localNumId + "(?!\\d)");
+                Matcher matcher = pattern.matcher(text);
+
+                if(matcher.find()){
                     l.getArquivosDeFotos().add(f);
                     f.setLocal(l);
                     fotoService.save(f);
                     localService.save(l);
                 }
+
             }
         }
     }
+
+//    @Transactional
+//    public void saveFotosOnLocal(){
+//        List<Foto> fotos = fotoService.getAll();
+//        List<Local> locais = localService.getAll();
+//
+//        for (Foto f : fotos) {
+//            for (Local l : locais) {
+//                if ((f.getNome().contains(l.getNumIdentificacao()+" ")) ||
+//                        (f.getNome().contains(l.getNumIdentificacao() + "_")) ||
+//                        (f.getNome().contains(l.getNumIdentificacao() + "("))) {
+//                    l.getArquivosDeFotos().add(f);
+//                    f.setLocal(l);
+//                    fotoService.save(f);
+//                    localService.save(l);
+//                }
+//            }
+//        }
+//    }
 
     @Transactional
     public void readSpreadsheet(String fileLocation) throws IOException {

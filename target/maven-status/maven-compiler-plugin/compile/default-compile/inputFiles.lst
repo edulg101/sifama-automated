@@ -4,6 +4,7 @@ D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\repositories\LocalRepo.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\config\h2Config.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\services\TroService.java
+D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\services\StartAutomation.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\repositories\FotoRepo.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\services\LocalService.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\controller\WebController.java
@@ -15,5 +16,4 @@ D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\services\FotoService.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\model\Local.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\repositories\TroRepo.java
-D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\StartAutomation.java
 D:\Documentos\Users\Eduardo\Documentos\Informatica\Projeto ANTT\sifama\src\main\java\gov\antt\sifama\SifamaApplication.java

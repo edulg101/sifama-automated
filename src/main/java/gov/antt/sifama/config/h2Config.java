@@ -25,9 +25,9 @@ public class h2Config {
     FotoService fotoService;
 
 
-
     @Bean
     public boolean inicio() throws Exception {
+
 
         ie.readSpreadsheet(SPREADSHEETPATH);
 
