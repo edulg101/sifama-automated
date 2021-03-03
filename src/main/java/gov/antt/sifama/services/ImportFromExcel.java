@@ -134,25 +134,6 @@ public class ImportFromExcel {
         }
     }
 
-//    @Transactional
-//    public void saveFotosOnLocal(){
-//        List<Foto> fotos = fotoService.getAll();
-//        List<Local> locais = localService.getAll();
-//
-//        for (Foto f : fotos) {
-//            for (Local l : locais) {
-//                if ((f.getNome().contains(l.getNumIdentificacao()+" ")) ||
-//                        (f.getNome().contains(l.getNumIdentificacao() + "_")) ||
-//                        (f.getNome().contains(l.getNumIdentificacao() + "("))) {
-//                    l.getArquivosDeFotos().add(f);
-//                    f.setLocal(l);
-//                    fotoService.save(f);
-//                    localService.save(l);
-//                }
-//            }
-//        }
-//    }
-
     @Transactional
     public void readSpreadsheet(String fileLocation) throws IOException {
         FileInputStream file = new FileInputStream(new File(fileLocation));
@@ -166,7 +147,7 @@ public class ImportFromExcel {
 
         Tro tro = null;
 
-        for (int i = 0; i < sheet.getLastRowNum(); i++) {
+        for (int i = 0; i <= sheet.getLastRowNum(); i++) {
             if (i < 1){
                 continue;
             }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -64,9 +65,7 @@ public class StartAutomation {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-        Date today = new Date();
 
-        String todayStr = sdf.format(today);
 
         String password = "";
 
@@ -80,7 +79,7 @@ public class StartAutomation {
 
         WebDriver driver = new ChromeDriver(option);
 
-        WebDriverWait wait = new WebDriverWait(driver, 25);
+        WebDriverWait wait = new WebDriverWait(driver, 50);
         WebDriverWait longWait = new WebDriverWait(driver, 120000);
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -106,7 +105,7 @@ public class StartAutomation {
         consulta.waitForProcessBar();
 
 
-        consulta.waitForJStoLoad();
+//        consulta.waitForJStoLoad();
 
         inicioTro(driver, wait, consulta, js);
 
@@ -130,6 +129,12 @@ public class StartAutomation {
     }
 
     public void registroTro(Tro tro, Consulta consulta, WebDriver driver, WebDriverWait wait, JavascriptExecutor js) throws InterruptedException {
+
+        consulta.waitForJStoLoad();
+
+        consulta.waitForProcessBar();
+
+        consulta.waitForJStoLoad();
 
 
         System.out.println("Selecionando CRO na lista");
@@ -179,13 +184,18 @@ public class StartAutomation {
 
         consulta.jqueryScriptWithChange(idTipoPrazo, tipoTempo);
 
+        consulta.waitForProcessBar();
+
         System.out.println("informa data");
 
         consulta.waitToBeClickableAndClickById(idData);
 
+        consulta.waitForProcessBar();
         consulta.enviaChaves(idData, data);
+        consulta.waitForProcessBar();
 
         consulta.waitToBeClickableAndClickById(idHora);
+
         consulta.waitForProcessBar();
 
 
@@ -208,7 +218,15 @@ public class StartAutomation {
 
         consulta.enviaChaves(idHora, hora);
 
-        driver.findElement(By.id(idDescricaoOcorrencia)).click();
+        try{
+            consulta.waitToBeClickableAndClickById(idDescricaoOcorrencia);
+        }catch (RuntimeException e){
+            System.out.println("exception na linha 212 : nao conseguiu clicar em idDescriçãoOcorrencia");
+        }
+
+        consulta.scriptToClick(idDescricaoOcorrencia);
+
+//        driver.findElement(By.id(idDescricaoOcorrencia)).click();
         consulta.waitForProcessBar();
 
         System.out.println("Insere UF");
@@ -277,7 +295,7 @@ public class StartAutomation {
 
                 consulta.changeValueInSelectByTexts("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ddlFotoLocal", kmInicial, kmFinal);
 
-                consulta.enviaChaves("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_uplFotoLocal", IMGPATH + "\\" + tro.getLocais().get(i).getArquivosDeFotos().get(z).getNome());
+                consulta.enviaChaves("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_uplFotoLocal", IMGPATHGPS + File.separator + tro.getLocais().get(i).getArquivosDeFotos().get(z).getNome());
 
                 countImages++;
 
@@ -292,9 +310,12 @@ public class StartAutomation {
 
                 WebDriverWait longWait = new WebDriverWait(driver, 50000);
                 Thread.sleep(500);
-                while (!waitForJStoLoad(js, longWait)) {
-                    Thread.sleep(500);
-                }
+
+                consulta.waitForProcessBar();
+//
+//                while (!waitForJStoLoad(js, longWait)) {
+//                    Thread.sleep(500);
+//                }
 
                 Thread.sleep(500);
                 System.out.println( "OK !");
@@ -312,6 +333,12 @@ public class StartAutomation {
         consulta.scriptToClick("MessageBox_ButtonOk");
 
         Thread.sleep(1000);
+
+        consulta.waitForProcessBar();
+
+        consulta.waitForProcessBar();
+
+        consulta.waitForJStoLoad();
 
         consulta.waitForProcessBar();
 

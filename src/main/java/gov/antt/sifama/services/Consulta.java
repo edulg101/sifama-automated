@@ -26,16 +26,22 @@ public class Consulta {
 
     public void changeValueInSelect(String id, String value) throws InterruptedException {
 
-        Thread.sleep(1500);
+        Thread.sleep(500);
 
         waitForJStoLoad();
+
         WebElement processando = driver.findElement(By.id("Progress_LabelProcessando"));
+
         wait.until(ExpectedConditions.invisibilityOf(processando));
+
         waitForElementById(id);
+
         Select select = new Select(driver.findElement(By.id(id)));
 
         waitForJStoLoad();
+
         waitForOptionInSelect(select, id);
+
         while (true) {
             try {
                 select.selectByValue(value);
@@ -203,9 +209,11 @@ public class Consulta {
     public void waitForProcessBar() throws InterruptedException {
 
         WebDriverWait longWait = new WebDriverWait(driver, 55000);
-        WebElement processando = driver.findElement(By.id("Progress_LabelProcessando"));
-
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Progress_LabelProcessando")));
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("Progress_LabelProcessando")));
+        } catch (NoSuchElementException e){
+            System.out.println("consulta linha 209");
+        }
         Thread.sleep(500);
         boolean processDisplayed = false;
         try {
@@ -215,7 +223,7 @@ public class Consulta {
             System.out.println("deu rolo no process displayed");
         }
         if(processDisplayed) {
-            longWait.until(ExpectedConditions.invisibilityOf(processando));
+            longWait.until(ExpectedConditions.invisibilityOf(driver.findElement(By.id("Progress_LabelProcessando"))));
         }
         Thread.sleep(500);
 

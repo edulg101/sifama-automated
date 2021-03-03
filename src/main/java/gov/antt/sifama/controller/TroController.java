@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static gov.antt.sifama.services.appConstants.AppConstants.IMGPATH;
+import static gov.antt.sifama.services.appConstants.AppConstants.IMGPATHGPS;
 
 
 @RestController
@@ -52,9 +53,9 @@ public class TroController {
         assert foto != null;
         String nome = foto.getNome();
 
-        System.out.println(IMGPATH + File.separator + nome);
+        System.out.println(IMGPATHGPS + File.separator + nome);
 
-        Image img = new Image(IMGPATH + File.separator + nome);
+        Image img = new Image(IMGPATHGPS + File.separator + nome);
 
 
         byte[] bit = img.getByteArray();

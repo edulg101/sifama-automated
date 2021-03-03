@@ -92,6 +92,7 @@ public class TroService {
             startAutomation.inicioDigitacao();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            System.exit(-1);
         }
     }
 

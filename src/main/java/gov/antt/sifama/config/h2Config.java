@@ -1,12 +1,16 @@
 package gov.antt.sifama.config;
 
 import gov.antt.sifama.services.FotoService;
+import gov.antt.sifama.services.ImportExcelTika;
 import gov.antt.sifama.services.ImportFromExcel;
 import gov.antt.sifama.services.StartAutomation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+
+import java.io.File;
+import java.io.FileInputStream;
 
 import static gov.antt.sifama.services.appConstants.AppConstants.*;
 
@@ -24,12 +28,17 @@ public class h2Config {
     @Autowired
     FotoService fotoService;
 
+    @Autowired
+    ImportExcelTika tika;
+
 
     @Bean
     public boolean inicio() throws Exception {
 
+        tika.parseExcel(SPREADSHEETPATH);
 
-        ie.readSpreadsheet(SPREADSHEETPATH);
+
+//        ie.readSpreadsheet(SPREADSHEETPATH);
 
         fotoService.unzipAllDirectory(ORIGINIMAGESFOLDER, IMGPATH);
 
