@@ -9,6 +9,7 @@ import java.util.Scanner;
 public abstract class AppConstants {
 
     private static final String operatinSystemSystem = System.getProperty("os.name");
+    private static final String ops = "ops";
 
     public static final Scanner SCANNER = getScanner();
     public static final String PASSWORD = "";
