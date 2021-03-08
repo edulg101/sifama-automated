@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Profile;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.Scanner;
 
 import static gov.antt.sifama.services.appConstants.AppConstants.*;
 
@@ -32,15 +35,30 @@ public class h2Config {
     ImportExcelTika tika;
 
 
+
+
     @Bean
     public boolean inicio() throws Exception {
+
 
         tika.parseExcel(SPREADSHEETPATH);
 
 
 //        ie.readSpreadsheet(SPREADSHEETPATH);
 
-        fotoService.unzipAllDirectory(ORIGINIMAGESFOLDER, IMGPATH);
+
+        System.out.println("Digite a pasta onde estão os arquivos zip das fotos");
+
+        String origemFotosFolder = SCANNER.nextLine();
+
+        System.out.println(origemFotosFolder);
+
+//        origemFotosFolder = origemFotosFolder.replace("\\", "/");
+
+        System.out.println(origemFotosFolder);
+
+
+        fotoService.unzipAllDirectory(origemFotosFolder, IMGPATH);
 
         ie.saveFotosOnLocal();
 

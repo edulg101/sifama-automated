@@ -58,18 +58,12 @@ public class StartAutomation {
     String kmInicial = "";
     String kmFinal = "";
 
+    int totalTro = 0;
+    int actualTro = 0;
+
 
     @Transactional
     public void inicioDigitacao() throws InterruptedException {
-
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-
-
-
-        String password = "";
-
-        String user = "";
 
 
         System.setProperty("webdriver.chrome.driver", DRIVERPATH);
@@ -80,7 +74,6 @@ public class StartAutomation {
         WebDriver driver = new ChromeDriver(option);
 
         WebDriverWait wait = new WebDriverWait(driver, 50);
-        WebDriverWait longWait = new WebDriverWait(driver, 120000);
 
         JavascriptExecutor js = (JavascriptExecutor) driver;
 
@@ -95,8 +88,8 @@ public class StartAutomation {
         WebElement senha = driver.findElement(By.id("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_TextBoxSenha"));
         WebElement entrar = driver.findElement(By.id("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ButtonOk"));
 
-        usuario.sendKeys(user);
-        senha.sendKeys(password);
+        usuario.sendKeys(USER);
+        senha.sendKeys(PASSWORD);
 
         System.out.println("entrando com senha");
 
@@ -113,6 +106,7 @@ public class StartAutomation {
 
     public void inicioTro(WebDriver driver, WebDriverWait wait, Consulta consulta, JavascriptExecutor js) throws InterruptedException {
         List<Tro> troList = troService.getAll();
+        totalTro = troList.size();
         boolean primeiro = true;
         for (Tro tro : troList) {
             Thread.sleep(700);
@@ -123,6 +117,8 @@ public class StartAutomation {
                 js.executeScript("document.getElementById('MessageBox_ButtonOk').click()");
             }
             primeiro = false;
+            actualTro = troList.indexOf(tro) + 1;
+
             registroTro(tro, consulta, driver, wait, js);
 
         }
@@ -222,6 +218,7 @@ public class StartAutomation {
             consulta.waitToBeClickableAndClickById(idDescricaoOcorrencia);
         }catch (RuntimeException e){
             System.out.println("exception na linha 212 : nao conseguiu clicar em idDescriçãoOcorrencia");
+            return;
         }
 
         consulta.scriptToClick(idDescricaoOcorrencia);
@@ -267,8 +264,9 @@ public class StartAutomation {
 
             System.out.println("Incluindo Local .....");
 
-
+            int h = 0;
             while (true) {
+                h++;
                 try {
                     consulta.waitForElementById("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnIncluirLocal");
                     consulta.scriptToClick("ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnIncluirLocal");
@@ -277,6 +275,9 @@ public class StartAutomation {
                     break;
                 } catch (org.openqa.selenium.StaleElementReferenceException | ElementClickInterceptedException e) {
                     System.out.println("tentando novamente clicar no botão incluir");
+                    if(h>3){
+                        return;
+                    }
                 }
                 Thread.sleep(500);
 
@@ -313,16 +314,13 @@ public class StartAutomation {
 
                 consulta.waitForProcessBar();
 //
-//                while (!waitForJStoLoad(js, longWait)) {
-//                    Thread.sleep(500);
-//                }
 
                 Thread.sleep(500);
                 System.out.println( "OK !");
             }
         }
 
-        System.out.println("Salva o TRO Atual .... ");
+        System.out.print("Salva o TRO " + actualTro + "/ " + totalTro + " ........... ");
 
 
         js.executeScript("document.getElementById('ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnSalvar').click()");
@@ -342,9 +340,14 @@ public class StartAutomation {
 
         consulta.waitForProcessBar();
 
+        System.out.print("OK ");
+        System.out.println();
+
     }
 
     private List<String> getArtigoFromPalavraChave(String palavraChave) {
+
+        palavraChave = palavraChave.toLowerCase();
 
         if (palavraChave.contains("buraco")) {
             art = "6";
@@ -383,6 +386,12 @@ public class StartAutomation {
         } else if (palavraChave.contains("pmv")){
             art = "5";
             tipoOcorrencia = "752";
+        } else if (palavraChave.toLowerCase().contains("guarda corpo")){
+            art = "7";
+            tipoOcorrencia = "811";
+        } else if (palavraChave.contains("sujeira")){
+            art = "7";
+            tipoOcorrencia = "806";
         }
         else {
             System.out.println("deu merda");
@@ -396,34 +405,125 @@ public class StartAutomation {
         return list;
     }
 
+    private void getDisposicaoLegal(String palavraChave) {
+        Map<String, List<String>> disposicaoLegal = new HashMap<>();
 
-    public boolean waitForJStoLoad(JavascriptExecutor js, WebDriverWait wait) {
 
-        js.executeScript("console.log(document.readyState)");
-        // wait for jQuery to load
-        ExpectedCondition<Boolean> jQueryLoad = new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                try {
-                    return ((Long) js.executeScript("return jQuery.active") == 0);
-                } catch (Exception e) {
-                    return true;
-                }
-            }
-        };
 
-        // wait for Javascript to load
-        ExpectedCondition<Boolean> jsLoad = new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver driver) {
-                return js.executeScript("return document.readyState")
-                        .toString().equals("complete");
-            }
-        };
 
-        return wait.until(jQueryLoad) && wait.until(jsLoad);
+
+// Art 5
+
+//      742	III - deixar de executar os serviços de conservação das instalações, áreas operacionais e bens vinculados à concessão por prazo superior a 72 horas após a ocorrência de evento que comprometa suas condições normais de uso e a integridade do bem
+//      744	V - deixar de remover, da faixa de domínio, material resultante de poda, capina ou obras no prazo de 48 (quarenta e oito) horas, salvo no caso de materiais reaproveitáveis ou de bota-foras autorizados pela ANTT
+//      748	IX - deixar de repor ou manter tachas, tachões e balizadores refletivos danificados ou ausentes no prazo de 72 (setenta e duas) horas
+//      751	XII - deixar de adotar medidas, ainda que provisórias, para reparação de cercamento nas áreas operacionais por prazo superior a 24 (vinte e quatro) horas
+//      752	XIII - deixar de adotar medidas, ainda que provisórias, para reparar painel de mensagem variável inoperante ou em condições que não permitam a transmissão de informações aos usuários, por prazo superior a 72 (setenta e duas) horas
+//      753	XIV - deixar de adotar medidas, ainda que provisórias para reparação das cercas limítrofes da faixa de proteção e de seus aceiros por prazo superior a 72 (setenta e duas) horas
+//      754	XV - deixar de adotar medidas, ainda que provisórias, para corrigir falha em sistema ou equipamento dos postos de pesagem no prazo de 24 (vinte e quatro) horas ou de acordo com o especificado no Contrato e/ou PER, se este fizer referência diversa
+//      767	XXVIII - deixar de adotar providências para corrigir desnível entre faixas contíguas, ainda que em caráter provisório, no prazo de 24 (vinte e quatro) horas, ou, deixar de implementar a solução definitiva para correção no prazo estabelecido pela ANTT
+
+
+//Art 6:
+
+//       773	III - deixar de corrigir depressões, abaulamentos (escorregamentos de massa asfáltica) ou áreas exsudadas na pista ou no acostamento, no prazo de 72 (setenta e duas) horas, ou conforme previsto no Contrato de Concessão e/ou PER
+//      774	IV - deixar de corrigir/tapar buracos, panelas na pista ou no acostamento, no prazo de 24 (vinte e quatro) horas, ou conforme previsto no Contrato de Concessão e/ou PER
+//      775	V - deixar de corrigir, no pavimento rígido, defeitos com grau de severidade alto, no prazo de 7 (sete) dias, ou conforme previsto no Contrato de Concessão e/ou PER
+//      777	VII - deixar de corrigir, no pavimento rígido, defeitos de alçamento de placa, fissura de canto, placa dividida (rompida), escalonamento ou degrau, placa bailarina, quebras localizadas e buracos no prazo de 48 (quarenta e oito) horas, ou conforme previsto no Contrato de Concessão e/ou PER
+//      778	VIII - deixar de manter ou manter de forma não visível pelos usuários sinalização (vertical ou aérea) de indicação, de serviços auxiliares ou educativas, por prazo superior a 7 (sete) dias
+//      780	X - deixar de manter ou manter de forma não funcional dispositivo anti-ofuscante por prazo superior a 7 (sete) dias, ou conforme previsto no Contrato de Concessão ou no PER
+//      781	XI - deixar com problemas de conservação elemento de OAE, exceto guarda-corpo, por prazo superior a 30 (trinta) dias ou conforme Contrato de Concessão e/ou PER
+//      782	XII - deixar de reparar, limpar ou desobstruir sistema de drenagem e Obra-de-Arte Corrente-OAC por prazo superior a 72 (setenta e duas) horas, ou conforme previsto no Contrato de Concessão ou no PER
+//      783	XIII - deixar de adotar providências para solucionar, ainda que de modo provisório, processo erosivo ou condição de instabilidade em talude, por prazo superior a 72 (setenta e duas) horas, ou deixar de implementar solução definitiva no prazo estabelecido pela ANTT
+//      784	XIV - deixar de manter ou manter de forma não funcional o sistema de iluminação da rodovia, por prazo superior a 48 (quarenta e oito) horas
+//      786	XVI - deixar de corrigir falha em equipamento de praça de pedágio no prazo de 6 (seis) horas, sem prejuízo ao atendimento dos parâmetros de desempenho estabelecidos no PER
+//      787	XVII - deixar "Call Box" inoperante por prazo superior a 24 (vinte e quatro) horas, ou de acordo com o especificado no PER, se este fizer referência diversa
+//      798	XXVIII - deixar de intervir, mesmo que provisoriamente, em recalque em pavimento na cabeceira de OAE e/ou OAC por prazo superior a 72 (setenta e duas) horas, desde que essa obrigação tenha sido prevista no Contrato de Concessão ou PER
+
+
+
+//Art 7
+
+//        806	VIII - deixar de remover material da(s) faixa(s) de rolamento( s) ou acostamento(s) que obstrua ou comprometa a correta fluidez do tráfego no prazo de 6 (seis) horas a partir do evento que lhe deu origem
+//          807	IX - deixar de manter ou manter a sinalização horizontal, vertical ou aérea, em desconformidade com as normas técnicas vigentes, por prazo superior ao estabelecido pela ANTT, excluídas as ocorrências previstas nos artigos 5°, 6° e 9°
+//        808	X - deixar de recompor barreira rígida ou defensa metálica danificada no prazo de 48 horas
+//          810	XII - deixar de intervir para restaurar a funcionalidade de elemento da rodovia quando da ocorrência de fatos oriundos da ação de terceiros ou de eventos da natureza que possam colocar em risco a segurança do usuário, no prazo de 48 (quarenta e oito) horas ou conforme estabelecido pela ANTT
+//          811	XIII - deixar de recuperar, ainda que provisoriamente, guarda- corpo de OAE, inclusive passarela, por prazo superior a 24 (vinte e quatro) horas, ou, deixar de efetuar sua reposição definitiva, por prazo superior a 72 (setenta e duas) horas, ou conforme Contrato e/ou PER
+
+
+// Art 8
+
+//        864	VII - deixar de adotar as providências cabíveis, inclusive por vias judiciais, para garantia do patrimônio da rodovia, da faixa de domínio, das edificações e dos bens da concessão, inclusive quanto à implantação de acessos irregulares e ocupações ilegais; Nos casos de constatação destas irregularidades para as concessões da 2ª etapa, há previsão contratual de prazo de 24 (vinte e quatro) horas para a correção. Deste modo, deverá ser expedido TRO enquadrado neste mesmo Art. 8º, inciso VII, da Re</option>
+
+
+// Art 9
+
+//        863	VII - deixar de manter ou manter sinalização vertical de regulamentação em desconformidade com as normas técnicas vigentes, por prazo superior ao previsto no Contrato de Concessão ou no PER
+
+
+
+
     }
+
+
+
+
+
 }
+
+
+
+
+
+// Art 5
+
+//      742	III - deixar de executar os serviços de conservação das instalações, áreas operacionais e bens vinculados à concessão por prazo superior a 72 horas após a ocorrência de evento que comprometa suas condições normais de uso e a integridade do bem
+//      744	V - deixar de remover, da faixa de domínio, material resultante de poda, capina ou obras no prazo de 48 (quarenta e oito) horas, salvo no caso de materiais reaproveitáveis ou de bota-foras autorizados pela ANTT
+//      748	IX - deixar de repor ou manter tachas, tachões e balizadores refletivos danificados ou ausentes no prazo de 72 (setenta e duas) horas
+//      751	XII - deixar de adotar medidas, ainda que provisórias, para reparação de cercamento nas áreas operacionais por prazo superior a 24 (vinte e quatro) horas
+//      752	XIII - deixar de adotar medidas, ainda que provisórias, para reparar painel de mensagem variável inoperante ou em condições que não permitam a transmissão de informações aos usuários, por prazo superior a 72 (setenta e duas) horas
+//      753	XIV - deixar de adotar medidas, ainda que provisórias para reparação das cercas limítrofes da faixa de proteção e de seus aceiros por prazo superior a 72 (setenta e duas) horas
+//      754	XV - deixar de adotar medidas, ainda que provisórias, para corrigir falha em sistema ou equipamento dos postos de pesagem no prazo de 24 (vinte e quatro) horas ou de acordo com o especificado no Contrato e/ou PER, se este fizer referência diversa
+//      767	XXVIII - deixar de adotar providências para corrigir desnível entre faixas contíguas, ainda que em caráter provisório, no prazo de 24 (vinte e quatro) horas, ou, deixar de implementar a solução definitiva para correção no prazo estabelecido pela ANTT
+
+
+//Art 6:
+
+//       773	III - deixar de corrigir depressões, abaulamentos (escorregamentos de massa asfáltica) ou áreas exsudadas na pista ou no acostamento, no prazo de 72 (setenta e duas) horas, ou conforme previsto no Contrato de Concessão e/ou PER
+//      774	IV - deixar de corrigir/tapar buracos, panelas na pista ou no acostamento, no prazo de 24 (vinte e quatro) horas, ou conforme previsto no Contrato de Concessão e/ou PER
+//      775	V - deixar de corrigir, no pavimento rígido, defeitos com grau de severidade alto, no prazo de 7 (sete) dias, ou conforme previsto no Contrato de Concessão e/ou PER
+//      777	VII - deixar de corrigir, no pavimento rígido, defeitos de alçamento de placa, fissura de canto, placa dividida (rompida), escalonamento ou degrau, placa bailarina, quebras localizadas e buracos no prazo de 48 (quarenta e oito) horas, ou conforme previsto no Contrato de Concessão e/ou PER
+//      778	VIII - deixar de manter ou manter de forma não visível pelos usuários sinalização (vertical ou aérea) de indicação, de serviços auxiliares ou educativas, por prazo superior a 7 (sete) dias
+//      780	X - deixar de manter ou manter de forma não funcional dispositivo anti-ofuscante por prazo superior a 7 (sete) dias, ou conforme previsto no Contrato de Concessão ou no PER
+//      781	XI - deixar com problemas de conservação elemento de OAE, exceto guarda-corpo, por prazo superior a 30 (trinta) dias ou conforme Contrato de Concessão e/ou PER
+//      782	XII - deixar de reparar, limpar ou desobstruir sistema de drenagem e Obra-de-Arte Corrente-OAC por prazo superior a 72 (setenta e duas) horas, ou conforme previsto no Contrato de Concessão ou no PER
+//      783	XIII - deixar de adotar providências para solucionar, ainda que de modo provisório, processo erosivo ou condição de instabilidade em talude, por prazo superior a 72 (setenta e duas) horas, ou deixar de implementar solução definitiva no prazo estabelecido pela ANTT
+//      784	XIV - deixar de manter ou manter de forma não funcional o sistema de iluminação da rodovia, por prazo superior a 48 (quarenta e oito) horas
+//      786	XVI - deixar de corrigir falha em equipamento de praça de pedágio no prazo de 6 (seis) horas, sem prejuízo ao atendimento dos parâmetros de desempenho estabelecidos no PER
+//      787	XVII - deixar "Call Box" inoperante por prazo superior a 24 (vinte e quatro) horas, ou de acordo com o especificado no PER, se este fizer referência diversa
+//      798	XXVIII - deixar de intervir, mesmo que provisoriamente, em recalque em pavimento na cabeceira de OAE e/ou OAC por prazo superior a 72 (setenta e duas) horas, desde que essa obrigação tenha sido prevista no Contrato de Concessão ou PER
+
+
+
+//Art 7
+
+//        806	VIII - deixar de remover material da(s) faixa(s) de rolamento( s) ou acostamento(s) que obstrua ou comprometa a correta fluidez do tráfego no prazo de 6 (seis) horas a partir do evento que lhe deu origem
+//          807	IX - deixar de manter ou manter a sinalização horizontal, vertical ou aérea, em desconformidade com as normas técnicas vigentes, por prazo superior ao estabelecido pela ANTT, excluídas as ocorrências previstas nos artigos 5°, 6° e 9°
+//        808	X - deixar de recompor barreira rígida ou defensa metálica danificada no prazo de 48 horas
+//          810	XII - deixar de intervir para restaurar a funcionalidade de elemento da rodovia quando da ocorrência de fatos oriundos da ação de terceiros ou de eventos da natureza que possam colocar em risco a segurança do usuário, no prazo de 48 (quarenta e oito) horas ou conforme estabelecido pela ANTT
+//          811	XIII - deixar de recuperar, ainda que provisoriamente, guarda- corpo de OAE, inclusive passarela, por prazo superior a 24 (vinte e quatro) horas, ou, deixar de efetuar sua reposição definitiva, por prazo superior a 72 (setenta e duas) horas, ou conforme Contrato e/ou PER
+
+
+// Art 8
+
+//        864	VII - deixar de adotar as providências cabíveis, inclusive por vias judiciais, para garantia do patrimônio da rodovia, da faixa de domínio, das edificações e dos bens da concessão, inclusive quanto à implantação de acessos irregulares e ocupações ilegais; Nos casos de constatação destas irregularidades para as concessões da 2ª etapa, há previsão contratual de prazo de 24 (vinte e quatro) horas para a correção. Deste modo, deverá ser expedido TRO enquadrado neste mesmo Art. 8º, inciso VII, da Re</option>
+
+
+// Art 9
+
+//        863	VII - deixar de manter ou manter sinalização vertical de regulamentação em desconformidade com as normas técnicas vigentes, por prazo superior ao previsto no Contrato de Concessão ou no PER
+
+
 
 
 

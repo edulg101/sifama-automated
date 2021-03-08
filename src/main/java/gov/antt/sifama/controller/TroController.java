@@ -84,8 +84,15 @@ public class TroController {
         return ResponseEntity.ok().body(obj);
     }
 
+    @PostMapping (value = "/postDigitacao")
+    public ResponseEntity<List<TroDto>> iniciaDigitacao1() {
+        service.startDigitacao();
+        List<TroDto> obj = service.getTroDto();
+        return ResponseEntity.ok().body(obj);
+    }
+
     @GetMapping (value = "/startOver")
-    public ResponseEntity<List<TroDto>> startOver() {
+    public ResponseEntity<List<TroDto>> startOver() throws Exception {
         service.startOver();
         List<TroDto> obj = service.getTroDto();
         return ResponseEntity.ok().body(obj);

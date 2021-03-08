@@ -1,15 +1,19 @@
 package gov.antt.sifama.services;
 
+import gov.antt.sifama.config.h2Config;
 import gov.antt.sifama.model.Local;
 import gov.antt.sifama.model.Tro;
 import gov.antt.sifama.model.dto.LocalDto;
 import gov.antt.sifama.model.dto.TroDto;
 import gov.antt.sifama.repositories.TroRepo;
+import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +37,12 @@ public class TroService {
     @Autowired
     ImportFromExcel ie;
 
+    @Autowired
+    ImportExcelTika tika;
+
+    @Autowired
+    h2Config h2Config;
+
     @Transactional
     public Tro save(Tro tro) {
         tro = troRepo.save(tro);
@@ -44,20 +54,13 @@ public class TroService {
 
     }
 
-    public void startOver(){
+    public void startOver() throws Exception {
         fotoService.deleteAll();
         localService.deleteAll();
         deleteAll();
 
-        try {
-            ie.readSpreadsheet(SPREADSHEETPATH);
-            fotoService.unzipAllDirectory(ORIGINIMAGESFOLDER, IMGPATH);
-            ie.saveFotosOnLocal();
-            fotoService.insertCaption();
+        h2Config.inicio();
 
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
 
 
     }
@@ -91,7 +94,7 @@ public class TroService {
         try {
             startAutomation.inicioDigitacao();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.out.println("não conseguiu entrar na digitação. deu merda");;
             System.exit(-1);
         }
     }

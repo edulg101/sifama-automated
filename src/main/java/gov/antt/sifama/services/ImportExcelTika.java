@@ -25,8 +25,9 @@ import java.util.*;
 public class ImportExcelTika {
 
     SimpleDateFormat sdfUSA = new SimpleDateFormat("MM/dd/yy");
-    SimpleDateFormat sdfBr = new SimpleDateFormat("dd/MM/yy");
+    SimpleDateFormat sdfBr = new SimpleDateFormat("dd/MM/yyyy");
     SimpleDateFormat sdfHour = new SimpleDateFormat("HH:mm");
+    SimpleDateFormat sdDayAndMinute = new SimpleDateFormat("MM/dd/yy HH:mm");
 
     String nIdentidade = "";
     String date;
@@ -67,12 +68,14 @@ public class ImportExcelTika {
         //OOXml parser
         OOXMLParser msofficeparser = new OOXMLParser();
         msofficeparser.parse(inputstream, handler, metadata, pcontext);
+        inputstream.close();
         return handler.toString();
 
     }
 
     public void parseExcel(String filePath) throws IOException, TikaException, SAXException, ParseException {
         String fullText = readexcel(filePath);
+
 
         int index = fullText.indexOf("Codigos");
 
@@ -90,6 +93,7 @@ public class ImportExcelTika {
         boolean endLocais = false;
         int i = -1;
         int j = -1;
+        Date tempDate = null;
 
         for (String line : lines) {
             i++;
@@ -121,13 +125,21 @@ public class ImportExcelTika {
                         nIdentidade = word;
                         nIdentidade = nIdentidade.replace(".", "");
                     } else if (j == 2) {
-                        System.out.println("'"+ word + "'");
-                        Date tempDate = sdfUSA.parse(word);
-                        word = sdfBr.format(tempDate);
+                        try{
+                            tempDate = sdDayAndMinute.parse(word);
+                        }catch (ParseException e){
+                            System.out.println("data sem hora");
+                        }
+                        Date tempDate1 = sdfUSA.parse(word);
+                        word = sdfBr.format(tempDate1);
                         date = word;
                     } else if (j == 3) {
-                        Date tempDate = sdfHour.parse(word);
-                        hora = sdfHour.format(tempDate);
+                        if (word.isEmpty()){
+                            hora = sdfHour.format(tempDate);
+                        }else {
+                            tempDate = sdfHour.parse(word);
+                            hora = sdfHour.format(tempDate);
+                        }
                     } else if (j == 5) {
                         if (word.contains("70")) {
                             rodovia = "70";
@@ -141,7 +153,8 @@ public class ImportExcelTika {
                     } else if (j == 7) {
                         kmFinal = word;
                     } else if (j == 8) {
-                        sentido = word.startsWith("c") ? "Crescente" : "Decrescente";
+
+                        sentido = word.toLowerCase().startsWith("c") ? "Crescente" : "Decrescente";
 
                         kmInicialDouble = Double.parseDouble(kmInicial.replace(",", "."));
                         kmFinalDouble = Double.parseDouble(kmFinal.replace(",", "."));
@@ -152,13 +165,19 @@ public class ImportExcelTika {
                                 kmFinalDouble = kmInicialDouble;
                                 kmInicialDouble = temp;
                             }
+                        } else if(sentido.equals("Decrescente")) {
+                            if (kmInicialDouble < kmFinalDouble) {
+                                double temp = kmFinalDouble;
+                                kmFinalDouble = kmInicialDouble;
+                                kmInicialDouble = temp;
+                            }
                         }
 
                         kmFinal = String.format("%.3f", kmFinalDouble);
                         kmInicial = String.format("%.3f", kmInicialDouble);
 
                     } else if (j == 9) {
-                        pista = word.contains("p") ? "1" : "2";
+                        pista = word.toLowerCase().contains("p") ? "1" : "2";
 
                     } else if (j == 10) {
 
