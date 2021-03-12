@@ -78,23 +78,18 @@ public class TroController {
     }
 
     @GetMapping (value = "/iniciadigitacao")
-    public ResponseEntity<List<TroDto>> iniciaDigitacao() {
+    public void iniciaDigitacao() throws InterruptedException {
         service.startDigitacao();
-        List<TroDto> obj = service.getTroDto();
-        return ResponseEntity.ok().body(obj);
+
     }
 
     @PostMapping (value = "/postDigitacao")
-    public ResponseEntity<List<TroDto>> iniciaDigitacao1() {
+    public void iniciaDigitacao1() throws InterruptedException {
         service.startDigitacao();
-        List<TroDto> obj = service.getTroDto();
-        return ResponseEntity.ok().body(obj);
     }
 
     @GetMapping (value = "/startOver")
-    public ResponseEntity<List<TroDto>> startOver() throws Exception {
+    public void startOver() throws Exception {
         service.startOver();
-        List<TroDto> obj = service.getTroDto();
-        return ResponseEntity.ok().body(obj);
     }
 }

@@ -227,8 +227,6 @@ public class Consulta {
         }
         Thread.sleep(500);
 
-
-
     }
 
 }

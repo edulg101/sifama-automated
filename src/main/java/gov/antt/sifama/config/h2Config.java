@@ -1,5 +1,7 @@
 package gov.antt.sifama.config;
 
+import gov.antt.sifama.model.ImgPath;
+import gov.antt.sifama.repositories.PathRepo;
 import gov.antt.sifama.services.FotoService;
 import gov.antt.sifama.services.ImportExcelTika;
 import gov.antt.sifama.services.ImportFromExcel;
@@ -34,6 +36,9 @@ public class h2Config {
     @Autowired
     ImportExcelTika tika;
 
+    @Autowired
+    PathRepo pathRepo;
+
 
 
 
@@ -51,11 +56,17 @@ public class h2Config {
 
         String origemFotosFolder = SCANNER.nextLine();
 
-        System.out.println(origemFotosFolder);
+        origemFotosFolder = origemFotosFolder.replace("\\", File.separator);
 
-//        origemFotosFolder = origemFotosFolder.replace("\\", "/");
+//        String origemFotosFolder = "/home/eduardo/Documentos/projetos/sifamaSources/imageszipped";
 
-        System.out.println(origemFotosFolder);
+//        String origemFotosFolder = "D:\\Documentos\\Users\\Eduardo\\Documentos\\ANTT\\OneDrive - ANTT- Agencia Nacional de Transportes Terrestres\\CRO\\Relatórios RTA\\Diário 10.03.2021\\Anexos";
+
+
+        ImgPath imgPath = new ImgPath(1, origemFotosFolder);
+
+        pathRepo.save(imgPath);
+
 
 
         fotoService.unzipAllDirectory(origemFotosFolder, IMGPATH);

@@ -1,19 +1,17 @@
 package gov.antt.sifama.services;
 
-import gov.antt.sifama.config.h2Config;
+import gov.antt.sifama.model.ImgPath;
 import gov.antt.sifama.model.Local;
 import gov.antt.sifama.model.Tro;
 import gov.antt.sifama.model.dto.LocalDto;
 import gov.antt.sifama.model.dto.TroDto;
+import gov.antt.sifama.repositories.PathRepo;
 import gov.antt.sifama.repositories.TroRepo;
-import org.apache.tika.exception.TikaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.text.ParseException;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +39,9 @@ public class TroService {
     ImportExcelTika tika;
 
     @Autowired
-    h2Config h2Config;
+    PathRepo pathRepo;
+
+
 
     @Transactional
     public Tro save(Tro tro) {
@@ -55,12 +55,23 @@ public class TroService {
     }
 
     public void startOver() throws Exception {
+
         fotoService.deleteAll();
         localService.deleteAll();
         deleteAll();
 
-        h2Config.inicio();
+        tika.parseExcel(SPREADSHEETPATH);
 
+        ImgPath imgPath = pathRepo.findById(1).orElse(null);
+        String origemFotosFolder = imgPath.getFilePath();
+        System.out.println(origemFotosFolder);
+
+
+        fotoService.unzipAllDirectory(origemFotosFolder, IMGPATH);
+
+        ie.saveFotosOnLocal();
+
+        fotoService.insertCaption();
 
 
     }
@@ -90,13 +101,8 @@ public class TroService {
         return dtoList;
     }
 
-    public void startDigitacao(){
-        try {
+    public void startDigitacao() throws InterruptedException {
             startAutomation.inicioDigitacao();
-        } catch (InterruptedException e) {
-            System.out.println("não conseguiu entrar na digitação. deu merda");;
-            System.exit(-1);
-        }
     }
 
     public void deleteAllBD(){

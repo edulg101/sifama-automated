@@ -76,7 +76,6 @@ public class ImportExcelTika {
     public void parseExcel(String filePath) throws IOException, TikaException, SAXException, ParseException {
         String fullText = readexcel(filePath);
 
-
         int index = fullText.indexOf("Codigos");
 
         fullText = fullText.substring(0, index);
@@ -192,8 +191,6 @@ public class ImportExcelTika {
                     }
                 }
             }
-
-            System.out.println();
             j = -1;
         }
     }
