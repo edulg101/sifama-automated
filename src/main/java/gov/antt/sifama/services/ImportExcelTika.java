@@ -11,6 +11,7 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
+import ucar.nc2.util.xml.Parse;
 
 import javax.transaction.Transactional;
 import java.io.File;
@@ -51,6 +52,9 @@ public class ImportExcelTika {
     @Autowired
     FotoService fotoService;
 
+    @Autowired
+    StartAutomation startAutomation;
+
 
     public ImportExcelTika() {
     }
@@ -76,9 +80,13 @@ public class ImportExcelTika {
     public void parseExcel(String filePath) throws IOException, TikaException, SAXException, ParseException {
         String fullText = readexcel(filePath);
 
+        System.out.println(fullText);
+
         int index = fullText.indexOf("Codigos");
 
         fullText = fullText.substring(0, index);
+
+        System.out.println(fullText);
 
 
         String[] lineArray = fullText.split("\n");
@@ -96,15 +104,21 @@ public class ImportExcelTika {
 
         for (String line : lines) {
             i++;
+
             String[] wordsArray = line.split("\t");
             List<String> words = new ArrayList<>(Arrays.asList(wordsArray));
 
             for (String word : words) {
+                word = word.trim();
                 j++;
+
+                System.out.printf("I - J : %d - %d \n ", i, j);
 
                 if (word.toLowerCase().contains("de ident.")) {
                     break;
                 }
+
+                System.out.println(word);
 
                 if (word.toLowerCase().contains("tro")) {
                     palavraChave = words.get(j + 1);
@@ -124,14 +138,19 @@ public class ImportExcelTika {
                         nIdentidade = word;
                         nIdentidade = nIdentidade.replace(".", "");
                     } else if (j == 2) {
-                        try{
-                            tempDate = sdDayAndMinute.parse(word);
-                        }catch (ParseException e){
-                            System.out.println("data sem hora");
+                        if(words.get(j+1) == null || words.get(j+1).isEmpty()){
+                            try{
+                                tempDate = sdDayAndMinute.parse(word);
+                                date = sdfBr.format(tempDate);
+                            }catch (ParseException e){
+                                System.out.println("teste");
+                            }
+                        } else {
+                            Date tempDate1 = sdfUSA.parse(word);
+                            word = sdfBr.format(tempDate1);
+                            date = word;
                         }
-                        Date tempDate1 = sdfUSA.parse(word);
-                        word = sdfBr.format(tempDate1);
-                        date = word;
+
                     } else if (j == 3) {
                         if (word.isEmpty()){
                             hora = sdfHour.format(tempDate);
@@ -180,9 +199,21 @@ public class ImportExcelTika {
 
                     } else if (j == 10) {
 
-                        Local local = new Local(null, tro, nIdentidade, date, hora, rodovia, kmInicial, kmFinal, sentido, pista);
-                        local.setObservacao(word);
-                        local = localService.save(local);
+                        if(!isLocalValid(rodovia, kmInicialDouble, palavraChave)){
+                            System.out.printf("Local fora do trecho : Rodovia %s Km %f\n", rodovia, kmInicialDouble);
+                            System.exit(-1);
+                        } else if(!isLocalValid(rodovia, kmFinalDouble, palavraChave)){
+                            System.out.printf("Local fora do trecho : Rodovia %s Km %f\n", rodovia, kmFinalDouble);
+                            System.exit(-1);
+                        }
+                        else {
+                            Local local = new Local(null, tro, nIdentidade, date, hora, rodovia, kmInicial, kmFinal, sentido, pista);
+                            local.setObservacao(word);
+                            local = localService.save(local);
+                        }
+
+
+
                     }
 
                     if (word.toLowerCase().contains("tro") && !endLocais) {
@@ -193,5 +224,43 @@ public class ImportExcelTika {
             }
             j = -1;
         }
+    }
+
+    private boolean isLocalValid(String rodovia, double kmDouble, String palavraChave){
+        String[] disposicao = startAutomation.getDisposicaoLegal(palavraChave);
+        boolean edificacoes = false;
+        if(disposicao[0].equals("5") && disposicao[1].equals("742")){
+            edificacoes = true;
+        }
+
+        switch (rodovia){
+            case "70" :
+                if (kmDouble < 495.9 || kmDouble > 524){
+                    return false;
+                }
+                return true;
+
+            case "163":
+                if ((kmDouble > 119.9 && kmDouble < 507.1) || (kmDouble > 855)){
+                    return false;
+                }
+                return true;
+
+            case "364":
+                if(kmDouble < 201 || kmDouble > 588.2){
+                    return false;
+                }
+                if(!edificacoes) {
+                    if  (kmDouble > 211.3 && kmDouble < 434.6)  {
+                        return false;
+                    }
+                } else {
+                   if(kmDouble > 402.4 && kmDouble < 434.6) {
+                        return false;
+                   }
+                }
+                return true;
+        }
+        return false;
     }
 }

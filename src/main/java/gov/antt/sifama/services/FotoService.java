@@ -289,8 +289,7 @@ public class FotoService {
 
             for (Local local : locais) {
                 boolean mat = AppUtil.getMatch(fileName, local.getNumIdentificacao() );
-                System.out.println("checando: " + local.getNumIdentificacao() + " file: " +
-                        fileName + " check: " + mat);
+
                 if (mat) {
                     extractFile(zipIn, filePath);
                 }

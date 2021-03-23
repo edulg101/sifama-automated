@@ -69,7 +69,7 @@ public class StartAutomation {
         System.setProperty("webdriver.chrome.driver", DRIVERPATH);
 
         ChromeOptions option = new ChromeOptions();
-        option.setHeadless(true);
+        option.setHeadless(false);
 
         WebDriver driver = new ChromeDriver(option);
 
@@ -345,7 +345,9 @@ public class StartAutomation {
 
     }
 
-    private String[]  getDisposicaoLegal(String palavraChave) {
+    public String[]  getDisposicaoLegal(String palavraChave) {
+
+        palavraChave = palavraChave.toLowerCase();
 
         if (palavraChave.contains("buraco")) {
             return new String[]{"6", "774"};
