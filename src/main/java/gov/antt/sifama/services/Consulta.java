@@ -8,6 +8,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 public class Consulta {
 
@@ -78,6 +79,28 @@ public class Consulta {
                 Thread.sleep(1000);
             }
 
+        }
+    }
+
+    public void checkForErrors() throws InterruptedException {
+        WebElement divError = null;
+        for (int i = 0; i < 10 ; i ++){
+            try {
+                divError = driver.findElement(By.id("MessageBox_LabelTitulo"));
+                if(divError.isDisplayed() && divError.getText().toLowerCase().contains("erro")){
+                        Scanner sc = new Scanner(System.in);
+                        System.out.println("Deu Erro. Ajuste e Digite em 'Sim' para continuar");
+                        String resp = sc.nextLine();
+                        while (!resp.equalsIgnoreCase("sim")){
+                            System.out.println("Deu Erro. Ajuste e Digite em 'Sim' para continuar");
+                            resp = sc.nextLine();
+                        }
+                }
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+                Thread.sleep(300);
+            }
+            Thread.sleep(500);
         }
     }
 

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import javax.imageio.metadata.IIOMetadata;
+//import javax.validation.constraints.Null;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -426,20 +427,22 @@ public class FotoService {
                     }
 
 
-//                    System.out.println(foto.getNome());
-
-                    switch (orientation) {
-                        case 6:
-                            image.setWidth(500);
-                            javaxt.io.Image rect = createRect(foto.getLocal().getObservacao(), 500);
-                            image.crop(0, 40, image.getWidth(), image.getHeight() - 40);
-                            image.addImage(rect, 0, image.getHeight(), true);
-                            break;
-                        case 1:
-                            image.setWidth(625);
-                            rect = createRect(foto.getLocal().getObservacao(), 625);
-                            image.addImage(rect, 0, image.getHeight(), true);
-                            break;
+                    try {
+                        switch (orientation) {
+                            case 6:
+                                image.setWidth(500);
+                                javaxt.io.Image rect = createRect(foto.getLocal().getObservacao(), 500);
+                                image.crop(0, 40, image.getWidth(), image.getHeight() - 40);
+                                image.addImage(rect, 0, image.getHeight(), true);
+                                break;
+                            case 1:
+                                image.setWidth(625);
+                                rect = createRect(foto.getLocal().getObservacao(), 625);
+                                image.addImage(rect, 0, image.getHeight(), true);
+                                break;
+                        }
+                    }catch (NullPointerException e){
+                        System.out.println("não conseguiu reduzir a foto");
                     }
 
                     System.out.println("gerando titulo da foto " + actualCount + " de " + totalInList);
@@ -487,33 +490,76 @@ public class FotoService {
         }
 
 
-        public javaxt.io.Image createRect (String captionText,int width){
+        public javaxt.io.Image createRect (String captionText, int width){
             int coordenateX = 0;
-            BufferedImage newImage = new BufferedImage(width, 34, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2 = newImage.createGraphics();
-            Color oldColor = g2.getColor();
-            g2.setPaint(Color.WHITE);
-            g2.fillRect(0, 0, width, 34);
-            g2.setColor(oldColor);
-            javaxt.io.Image img = new javaxt.io.Image(newImage);
+            javaxt.io.Image img = null;
             int len = captionText.length();
+            if (captionText.length() <= 50) {
+                BufferedImage newImage = new BufferedImage(width, 34, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2 = newImage.createGraphics();
+                Color oldColor = g2.getColor();
+                g2.setPaint(Color.WHITE);
+                g2.fillRect(0, 0, width, 34);
+                g2.setColor(oldColor);
+                img = new javaxt.io.Image(newImage);
 
-            if (len > 50) {
-                System.out.println("caption too big - lenght : " + len);
-                System.out.println("caption text = " + captionText);
-            }
-            if (width == 500) {
-                coordenateX = 250 - (int) ((4.3 * len));
-            } else {
-                coordenateX = 313 - (int) ((4.3 * len));
-            }
-            int coordenateY = 25;
-            if (captionText.length() > 1) {
+                if (width == 500) {
+                    coordenateX = 250 - (int) ((4.3 * len));
+                } else {
+                    coordenateX = 313 - (int) ((4.3 * len));
+                }
+                int coordenateY = 25;
                 captionText = captionText.substring(0, 1).toUpperCase() + captionText.substring(1);
 
                 img.addText(captionText, coordenateX, coordenateY, "arial", 18, 0, 0, 0);
+                return img;
+
+
+            } else {
+                int coordenateX1 = 0;
+                int coordenateX2 = 0;
+
+                BufferedImage newImage = new BufferedImage(width, 68, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g2 = newImage.createGraphics();
+                Color oldColor = g2.getColor();
+                g2.setPaint(Color.WHITE);
+                g2.fillRect(0, 0, width, 68);
+                g2.setColor(oldColor);
+                img = new javaxt.io.Image(newImage);
+                String captionText1 = "";
+                String captionText2 = "";
+                String[] strings = captionText.split(" ");
+                boolean full = false;
+                for (String word: strings) {
+                    System.out.println(word);
+                    if (!full && captionText1.length() + word.length() < 50) {
+                        captionText1 = captionText1 + " " + word;
+                    } else {
+                        full = true;
+                        captionText2 = captionText2 + " " + word;
+                    }
+                }
+
+
+
+                int coordenateY1 = 25;
+                int coordenateY2 = 50;
+                 captionText1 = captionText1.substring(0, 1).toUpperCase() + captionText1.substring(1);
+
+                if (width == 500) {
+                    coordenateX1 = 250 - (int) ((4.3 * captionText1.length()));
+                    coordenateX2 = 250 - (int) ((4.3 * captionText2.length()));
+                } else {
+                    coordenateX1 = img.getWidth()/2 - (int) ((4.3 * captionText1.length()));
+                    coordenateX2 = img.getWidth()/2 - (int) ((4.3 * captionText2.length()));
+                }
+
+                img.addText(captionText1, coordenateX1, coordenateY1, "arial", 18, 0, 0, 0);
+                img.addText(captionText2, coordenateX2, coordenateY2, "arial", 18, 0, 0, 0);
+                return img;
             }
-            return img;
+
+
 
         }
 

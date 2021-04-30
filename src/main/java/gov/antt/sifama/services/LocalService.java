@@ -16,10 +16,12 @@ public class LocalService {
     @Autowired
     LocalRepo localRepo;
 
-    public Local save(Local tro) {
-        tro = localRepo.save(tro);
-        return tro;
+    public Local save(Local local) {
+        local = localRepo.save(local);
+        return local;
     }
+
+
 
     public void deleteAll(){
         localRepo.deleteAll();
@@ -37,6 +39,11 @@ public class LocalService {
         String sentido = local.getSentido();
         Integer troId = local.getTro().getId();
         return new LocalDto(id, rodovia, kmInicial, kmFinal, sentido, troId);
+
+    }
+
+    public Local getLocalById(int id){
+        return localRepo.findById(id).orElseThrow();
 
     }
 

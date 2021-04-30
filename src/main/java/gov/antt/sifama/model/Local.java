@@ -27,6 +27,8 @@ public class Local implements Serializable {
     String kmFinal;
     String sentido;
     String observacao;
+    double kmInicialDouble;
+    double kmFinalDouble;
 
 
     @OneToMany(mappedBy = "local" , fetch = FetchType.EAGER)
@@ -144,6 +146,22 @@ public class Local implements Serializable {
 
     public void setPista(String pista) {
         this.pista = pista;
+    }
+
+    public double getKmInicialDouble() {
+        return kmInicialDouble;
+    }
+
+    public void setKmInicialDouble(double kmInicialDouble) {
+        this.kmInicialDouble = kmInicialDouble;
+    }
+
+    public double getKmFinalDouble() {
+        return kmFinalDouble;
+    }
+
+    public void setKmFinalDouble(double kmFinalDouble) {
+        this.kmFinalDouble = kmFinalDouble;
     }
 }
 

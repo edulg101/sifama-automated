@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static gov.antt.sifama.services.appConstants.AppConstants.*;
@@ -97,10 +96,10 @@ public class StartAutomation {
 
         consulta.waitForProcessBar();
 
-
-//        consulta.waitForJStoLoad();
-
         inicioTro(driver, wait, consulta, js);
+
+        // Alert After job is done.
+        js.executeScript("alert('Terminou')");
 
     }
 
@@ -223,6 +222,8 @@ public class StartAutomation {
 
         consulta.scriptToClick(idDescricaoOcorrencia);
 
+        consulta.checkForErrors();
+
 //        driver.findElement(By.id(idDescricaoOcorrencia)).click();
         consulta.waitForProcessBar();
 
@@ -241,7 +242,9 @@ public class StartAutomation {
 
             System.out.println("insere rodovia");
 
+
             consulta.jqueryScript(idRodovia, rodovia);
+            consulta.checkForErrors();
 
             System.out.println("insere pista");
 
@@ -258,6 +261,7 @@ public class StartAutomation {
 
             driver.findElement(By.id(idkmInicial)).clear();
             consulta.enviaChaves(idkmInicial, kmInicial);
+            consulta.checkForErrors();
 
             driver.findElement(By.id(idKmFinal)).clear();
             consulta.enviaChaves(idKmFinal, kmFinal);
@@ -283,6 +287,7 @@ public class StartAutomation {
 
             }
             consulta.waitForProcessBar();
+            consulta.checkForErrors();
 
         }
         int countImages = 0;
@@ -322,13 +327,18 @@ public class StartAutomation {
 
         System.out.print("Salva o TRO " + actualTro + " / " + totalTro + " ........... ");
 
+        consulta.checkForErrors();
+
 
         js.executeScript("document.getElementById('ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_ContentPlaceHolderCorpo_btnSalvar').click()");
         Thread.sleep(1000);
 
+        consulta.checkForErrors();
+
         consulta.waitForProcessBar();
 
         consulta.scriptToClick("MessageBox_ButtonOk");
+        consulta.checkForErrors();
 
         Thread.sleep(1000);
 

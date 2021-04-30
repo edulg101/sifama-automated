@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -49,14 +50,32 @@ public class h2Config {
         tika.parseExcel(SPREADSHEETPATH);
 
 
-//        ie.readSpreadsheet(SPREADSHEETPATH);
-
-
         System.out.println("Digite a pasta onde estão os arquivos zip das fotos");
 
         String origemFotosFolder = SCANNER.nextLine();
 
         origemFotosFolder = origemFotosFolder.replace("\\", File.separator);
+
+//        System.out.println("DIGITE:");
+//        System.out.printf("1 -> Movimentar Mouse \n 2 -> NÃO Movimentar Mouse\n");
+//        String o = SCANNER.nextLine();
+//        if (o.equals("1")){
+//            Robot robot = new Robot();
+//
+//            Runnable r = () -> {
+//                robot.mouseMove(100,200);
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                robot.mouseMove(800,500);
+//            };
+//
+//            mouseMove(r, 5000);
+//        }
+
+
 
 //        String origemFotosFolder = "/home/eduardo/Documentos/projetos/sifamaSources/imageszipped";
 
@@ -76,5 +95,17 @@ public class h2Config {
         fotoService.insertCaption();
 
         return true;
+    }
+    private static void mouseMove(Runnable runnable, int delay){
+        new Thread(() -> {
+            while(true) {
+                try {
+                    Thread.sleep(delay);
+                    runnable.run();
+                } catch (Exception e) {
+                    System.err.println(e);
+                }
+            }
+        }).start();
     }
 }
